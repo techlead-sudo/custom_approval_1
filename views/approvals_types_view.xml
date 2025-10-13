@@ -1,0 +1,169 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<odoo>
+    <record id="approval_type_tree_view" model="ir.ui.view">
+        <field name="name">approval.type.tree.view</field>
+        <field name="model">approvals.types</field>
+        <field name="arch" type="xml">
+            <tree string="Approval Types">
+                <field name="approvals_type"/>
+                <field name="company_id"/>
+            </tree>
+        </field>
+    </record>
+
+    <!-- Modern Kanban View -->
+    <record id="approval_type_kanban_view" model="ir.ui.view">
+        <field name="name">approval.type.kanban</field>
+        <field name="model">approvals.types</field>
+        <field name="arch" type="xml">
+            <kanban class="o_kanban_view approvals_kanban_view" create="true" edit="true">
+                <field name="approval_image"/>
+                <field name="approvals_type"/>
+                <field name="description"/>
+                <field name="approved_request_count"/>
+                <field name="rejected_request_count"/>
+                <field name="to_review_request_count"/>
+                <field name="to_verify_request_count"/>
+
+                <templates>
+                    <t t-name="kanban-box">
+                        <div class="o_kanban_card approval_card shadow-lg rounded-3 p-3 my-2"
+                             style="background: linear-gradient(135deg, #ffffff 0%, #f9fafb 100%);
+                                    border: 1px solid #e5e7eb;
+                                    transition: all 0.3s ease-in-out;">
+
+                            <div class="card_header d-flex align-items-center mb-3">
+                                <img t-att-src="kanban_image('approvals.types', 'approval_image', record.id.raw_value)"
+                                     class="rounded-circle shadow-sm me-3"
+                                     width="70" height="70"
+                                     alt="Type Image"/>
+                                <div>
+                                    <h5 class="fw-bold mb-1 text-primary" style="font-size: 1.1rem;">
+                                        <field name="approvals_type"/>
+                                    </h5>
+                                    <small class="text-muted">
+                                        <field name="description"/>
+                                    </small>
+                                </div>
+                            </div>
+
+                            <!-- Stats Section -->
+                            <div class="d-flex justify-content-between mb-3 flex-wrap">
+                                <span class="badge rounded-pill px-3 py-2"
+                                      style="background-color:#dcfce7; color:#166534;">
+                                    ✅ Approved:
+                                    <field name="approved_request_count"/>
+                                </span>
+                                <span class="badge rounded-pill px-3 py-2"
+                                      style="background-color:#fee2e2; color:#991b1b;">
+                                    ❌ Rejected:
+                                    <field name="rejected_request_count"/>
+                                </span>
+                            </div>
+
+                            <div class="d-flex justify-content-between mb-3 flex-wrap">
+                                <t t-if="record.to_review_request_count.raw_value &gt; 0">
+                                    <span class="badge rounded-pill px-3 py-2"
+                                          style="background-color:#fde68a; color:#78350f; font-weight:600; box-shadow:0 1px 3px rgba(0,0,0,0.1);">
+                                        🔎 To Review:
+                                        <field name="to_review_request_count"/>
+                                    </span>
+                                </t>
+                                <t t-if="record.to_verify_request_count.raw_value &gt; 0">
+                                    <span class="badge rounded-pill px-3 py-2"
+                                          style="background-color:#67e8f9; color:#083344; font-weight:600; box-shadow:0 1px 3px rgba(0,0,0,0.1);">
+                                        🕵️ Verify:
+                                        <field name="to_verify_request_count"/>
+                                    </span>
+                                </t>
+                            </div>
+
+
+                            <div class="text-center">
+                                <button type="object" name="action_new_approval_request"
+                                        class="btn btn-sm rounded-pill shadow-sm me-2"
+                                        style="background: linear-gradient(90deg, #ef4444, #f87171); color: #fff; font-weight: 600; border: 1px solid #ef4444;">
+                                    <i class="fa fa-plus me-1"></i>
+                                    New Request
+                                </button>
+                                <button type="object" name="action_get_approval_request"
+                                        class="btn btn-sm rounded-pill shadow-sm"
+                                        style="background: linear-gradient(90deg, #2563eb, #60a5fa); color: #fff; font-weight: 600; border: 1px solid #2563eb;">
+                                    <i class="fa fa-eye me-1"></i>
+                                    View All
+                                </button>
+                            </div>
+
+
+                            <!-- Hover Effect -->
+                            <style>
+                                .approval_card:hover {
+                                transform: translateY(-5px);
+                                box-shadow: 0 6px 18px rgba(0, 0, 0, 0.15);
+                                border-color: #cbd5e1;
+                                }
+                            </style>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+    <!-- Form View -->
+    <record id="approval_type_form_view" model="ir.ui.view">
+        <field name="name">approval.type.form.view</field>
+        <field name="model">approvals.types</field>
+        <field name="arch" type="xml">
+            <form string="Approvals" class="oe_form_stylish">
+                <sheet>
+                    <div class="oe_title mb-3 text-center">
+                        <field name="approval_image" widget="image" class="oe_avatar mb-2"/>
+                        <h1 class="text-primary fw-bold">
+                            <field name="approvals_type" placeholder="e.g. Procurement.." required="true"/>
+                        </h1>
+                    </div>
+
+                    <group>
+                        <field name="description"/>
+                        <field name="finance"/>
+                        <field name="company_id" options="{'no_create': True}"
+                               groups="base.group_multi_company"/>
+                    </group>
+
+                    <notebook>
+                        <page string="Approvers">
+                            <field name="approver_ids">
+                                <tree editable="bottom">
+                                    <field name="approver_id"/>
+                                    <field name="required"/>
+                                    <field name="weightage"/>
+                                </tree>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+
+                <div class="oe_chatter">
+                    <field name="message_follower_ids" widget="mail_followers"/>
+                    <field name="message_ids" widget="mail_thread"/>
+                </div>
+            </form>
+        </field>
+    </record>
+
+    <!-- Actions -->
+    <record id="action_approvals_type" model="ir.actions.act_window">
+        <field name="name">Approvals Types</field>
+        <field name="res_model">approvals.types</field>
+        <field name="view_mode">kanban,tree,form</field>
+        <field name="view_id" ref="approval_type_kanban_view"/>
+    </record>
+
+    <record id="action_approvals_type_list" model="ir.actions.act_window">
+        <field name="name">Approval Types</field>
+        <field name="res_model">approvals.types</field>
+        <field name="view_mode">tree,form</field>
+        <field name="view_id" ref="approval_type_tree_view"/>
+    </record>
+</odoo>

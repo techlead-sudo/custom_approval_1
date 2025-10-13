@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <record id="approval_request_tree_view" model="ir.ui.view">
+        <field name="name">approval.request.tree</field>
+        <field name="model">approval.request</field>
+        <field name="arch" type="xml">
+            <tree string="approval request">
+                <field name="name"/>
+                <field name="description"/>
+                <field name="state"/>
+            </tree>
+        </field>
+    </record>
+    <record id="approval_request_kanban_view" model="ir.ui.view">
+        <field name="name">approval.request.kanban</field>
+        <field name="model">approval.request</field>
+        <field name="arch" type="xml">
+            <kanban default_group_by="state" default_order="create_date desc" records_draggable="false"
+                    class="o_kanban_mobile" sample="1">
+                <field name="name"/>
+                <field name="description"/>
+                <field name="state"/>
+                <field name="paid_state"/>
+                <progressbar field="state"
+                             colors='{"verification": "warning","submitted":"danger","approved":"success"}'/>
+                <templates>
+                    <t t-name="kanban-box">
+                        <div t-attf-class="oe_kanban_global_click">
+                            <div class="row">
+                                <div class="col-12">
+                                    <strong>
+                                        <field name="name"/>
+                                    </strong>
+                                </div>
+                            </div>
+                            <div>
+                                <field name="approval_type_id"/>
+                            </div>
+                            <div class="o_kanban_record_bottom mt-3">
+                                <div class="oe_kanban_bottom_left">
+                                    <div>
+                                        <field name="approved_by_ids" widget="many2many_avatar_user"/>
+                                    </div>
+                                </div>
+                                <div class="oe_kanban_bottom_right">
+                                    <div>
+                                        <div t-if="record.paid_state.raw_value" class="text-end mt-2 text-danger">
+                                        <strong>
+                                            <field name="paid_state"/>
+                                        </strong>
+                                    </div>
+                                    <div class="text-end mt-2 text-success">
+                                        <span>
+                                            <field name="approval_date" options="{'format': 'datetime'}"/>
+                                        </span>
+                                    </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+    <record id="approval_request_form_view" model="ir.ui.view">
+        <field name="name">approval.request.form</field>
+        <field name="model">approval.request</field>
+        <field name="arch" type="xml">
+            <form string="Approval Request">
+                <field name="finance" invisible="1"/>
+                <field name="finance_approval" invisible="1"/>
+                <field name="paid_state" invisible="1"/>
+                <header>
+                    <button name="action_submit" type="object" string="Submit" class="oe_highlight"
+                            invisible="state != 'draft'"/>
+                    <button name="action_verify" type="object" class="btn-primary" string="Verify"
+                            groups="custom_approval.accountant_user"
+                            invisible="state !='verification'"/>
+            <button name="action_approve" type="object" string="Approve" class="btn-primary"
+                invisible="state not in ('submitted', 'on_hold')"/>
+            <button name="action_reject" type="object" string="Reject" class="btn-danger"
+                invisible="state not in ('submitted', 'on_hold','verification')"/>
+            <button name="action_ask_query" type="object" string="Ask Query" class="btn-danger"
+                invisible="state not in ('submitted', 'approved')"/>
+            <button name="action_on_hold" type="object" string="Hold" class="btn-secondary"
+                invisible="state not in ('submitted','verification')"/>
+            <button name="action_cancel" type="object" string="Cancel" class="btn-secondary"
+                invisible="state not in ('verification','submitted') or request_owner_id != uid"/>
+                    <button name="action_ask_resubmit" type="object" string="Re-Submit" class="btn-primary"
+                            invisible="state not in ('on_hold')"/>
+                    <button name="action_paid" type="object" class="btn-primary" string="Paid"
+                            groups="custom_approval.accountant_user"
+                            invisible="state !='approved' or paid_state == 'Paid'"/>
+                    <field name="state" widget="statusbar"
+                           statusbar_visible="draft,verified,submitted,cancel,on_hold,approved,rejected"/>
+                </header>
+                <sheet>
+                    <widget name="web_ribbon" title="Approved" bg_color="text-bg-success"
+                            invisible="state != 'approved'"/>
+                    <widget name="web_ribbon" title="Rejected" bg_color="text-bg-danger"
+                            invisible="state != 'rejected'"/>
+                    <div class="oe_title">
+                        <h1>
+                            <field name="name" placeholder="Approval Subject" required="true"
+                                   readonly="state != 'draft'"/>
+                        </h1>
+                    </div>
+                    <group>
+                        <field name="approval_type_id" required="true" readonly="state != 'draft'"/>
+                        <field name="request_owner_id" readonly="1"/>
+                        <field name="request_date" readonly="1"/>
+                    </group>
+                    <group>
+                        <field name="description" readonly="state != 'draft'"/>
+                    </group>
+                    <notebook>
+                        <page string="Approvers">
+                            <field name="approver_ids" readonly="true">
+                                <tree string="Approvers">
+                                    <field name="approver_id"/>
+                                </tree>
+                            </field>
+                        </page>
+                        <page string="Approval Status" readonly="true">
+                            <field name="approved_by_ids" readonly="1">
+                                <tree string="Approved By">
+                                    <field name="name"/>
+                                </tree>
+                            </field>
+                            <p>Approved Time:
+                                <field name="approval_date"/>
+                            </p>
+                        </page>
+                    </notebook>
+                </sheet>
+                <div class="oe_chatter">
+                    <field name="message_follower_ids"/>
+                    <field name="message_ids"/>
+                    <field name="activity_ids" widget="mail_activity" options="{'fold': True}"/>
+                </div>
+            </form>
+        </field>
+    </record>
+    <record id="action_approval_request" model="ir.actions.act_window">
+        <field name="name">Approval Requests</field>
+        <field name="res_model">approval.request</field>
+        <field name="view_mode">kanban,tree,form</field>
+    </record>
+    <record id="action_approval_request_kanban" model="ir.actions.act_window">
+        <field name="name">Approval Requests</field>
+        <field name="res_model">approval.request</field>
+        <field name="view_mode">kanban,form,tree</field>
+    </record>
+</odoo>
