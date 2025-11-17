@@ -2,7 +2,7 @@
     'name': 'Approvals',
     'version': '17.0.1.0.0',
     'summary': 'A comprehensive module to manage Approvals from the Managers',
-    'depends': ['base', 'web', 'mail'],
+    'depends': ['base', 'web', 'mail', 'hr'],
     'data': [
     'data/activity.xml',
     'security/groups.xml',

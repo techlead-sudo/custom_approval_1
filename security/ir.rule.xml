@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <odoo>
+    <!-- ========== APPROVAL REQUEST RULES ========== -->
     <!-- Rule for Admin to see all records -->
     <record id="rule_admin_see_all" model="ir.rule">
         <field name="name">Admin: Can see all records</field>
@@ -12,11 +13,36 @@
         <field name="perm_unlink" eval="1"/>
     </record>
 
-    <!-- Rule for Users to see only their own records OR records where they are approvers -->
-    <record id="rule_user_see_own_or_assigned" model="ir.rule">
-        <field name="name">Users: Can see own records or records assigned for approval</field>
+    <!-- Rule for HOD to see approval requests for their assigned types -->
+    <record id="rule_hod_see_requests" model="ir.rule">
+        <field name="name">HOD: Can see approval requests for assigned types</field>
         <field name="model_id" ref="model_approval_request"/>
-        <field name="domain_force">['|', ('request_owner_id', '=', user.id), ('approval_type_id.approver_ids.approver_id', '=', user.id)]</field>
+        <field name="domain_force">[('approval_type_id.visible_user_ids', 'in', [user.id])]</field>
+        <field name="groups" eval="[(4, ref('hod_approval_type'))]"/>
+        <field name="perm_read" eval="1"/>
+        <field name="perm_write" eval="1"/>
+        <field name="perm_create" eval="1"/>
+        <field name="perm_unlink" eval="0"/>
+    </record>
+
+    <!-- Rule for Sales users to see approval requests for their assigned types -->
+    <record id="rule_sales_see_requests" model="ir.rule">
+        <field name="name">Sales: Can see approval requests for assigned types</field>
+        <field name="model_id" ref="model_approval_request"/>
+        <field name="domain_force">[('approval_type_id.visible_user_ids', 'in', [user.id])]</field>
+        <field name="groups" eval="[(4, ref('sales_department_user'))]"/>
+        <field name="perm_read" eval="1"/>
+        <field name="perm_write" eval="1"/>
+        <field name="perm_create" eval="1"/>
+        <field name="perm_unlink" eval="0"/>
+    </record>
+
+
+    <!-- Rule for Users to see records if they are in visible_user_ids or are owner/approver -->
+    <record id="rule_user_see_own_or_assigned" model="ir.rule">
+        <field name="name">Users: Can see visible approval types</field>
+        <field name="model_id" ref="model_approval_request"/>
+        <field name="domain_force">['|', '|', ('request_owner_id', '=', user.id), ('approval_type_id.approver_ids.approver_id', '=', user.id), ('approval_type_id.visible_user_ids', 'in', [user.id])]</field>
         <field name="groups" eval="[(4, ref('other_users_approval_type'))]"/>
         <field name="perm_read" eval="1"/>
         <field name="perm_write" eval="1"/>
@@ -33,6 +59,68 @@
         <field name="perm_read" eval="1"/>
         <field name="perm_write" eval="1"/>
         <field name="perm_create" eval="1"/>
+        <field name="perm_unlink" eval="0"/>
+    </record>
+
+    <!-- ========== APPROVAL TYPES RULES ========== -->
+    <!-- Rule for Admin to see all approval types -->
+    <record id="rule_admin_see_all_types" model="ir.rule">
+        <field name="name">Admin: Can see all approval types</field>
+        <field name="model_id" ref="model_approvals_types"/>
+        <field name="domain_force">[]</field>
+        <field name="groups" eval="[(4, ref('admin_approval_type_form'))]"/>
+        <field name="perm_read" eval="1"/>
+        <field name="perm_write" eval="1"/>
+        <field name="perm_create" eval="1"/>
+        <field name="perm_unlink" eval="1"/>
+    </record>
+
+
+    <!-- Rule: HOD can see approval types if selected -->
+    <record id="rule_hod_see_types" model="ir.rule">
+        <field name="name">HOD: Can see approval types if selected</field>
+        <field name="model_id" ref="model_approvals_types"/>
+        <field name="domain_force">[('visible_user_ids', 'in', [user.id])]</field>
+        <field name="groups" eval="[(4, ref('hod_approval_type'))]"/>
+        <field name="perm_read" eval="1"/>
+        <field name="perm_write" eval="0"/>
+        <field name="perm_create" eval="0"/>
+        <field name="perm_unlink" eval="0"/>
+    </record>
+
+    <!-- Rule: Sales users can see approval types if selected -->
+    <record id="rule_sales_see_types" model="ir.rule">
+        <field name="name">Sales: Can see approval types if selected</field>
+        <field name="model_id" ref="model_approvals_types"/>
+        <field name="domain_force">[('visible_user_ids', 'in', [user.id])]</field>
+        <field name="groups" eval="[(4, ref('sales_department_user'))]"/>
+        <field name="perm_read" eval="1"/>
+        <field name="perm_write" eval="0"/>
+        <field name="perm_create" eval="0"/>
+        <field name="perm_unlink" eval="0"/>
+    </record>
+
+    <!-- Rule: Other users can only see approval types if selected -->
+    <record id="rule_visible_users_see_types" model="ir.rule">
+        <field name="name">Users: Can see approval types if selected</field>
+        <field name="model_id" ref="model_approvals_types"/>
+        <field name="domain_force">[('visible_user_ids', 'in', [user.id])]</field>
+        <field name="groups" eval="[(4, ref('other_users_approval_type'))]"/>
+        <field name="perm_read" eval="1"/>
+        <field name="perm_write" eval="0"/>
+        <field name="perm_create" eval="0"/>
+        <field name="perm_unlink" eval="0"/>
+    </record>
+
+    <!-- Rule for Accountant users to see all approval types (for finance approvals) -->
+    <record id="rule_accountant_see_all_types" model="ir.rule">
+        <field name="name">Accountant: Can see all approval types</field>
+        <field name="model_id" ref="model_approvals_types"/>
+        <field name="domain_force">[]</field>
+        <field name="groups" eval="[(4, ref('accountant_user'))]"/>
+        <field name="perm_read" eval="1"/>
+        <field name="perm_write" eval="0"/>
+        <field name="perm_create" eval="0"/>
         <field name="perm_unlink" eval="0"/>
     </record>
 </odoo>

@@ -6,6 +6,7 @@
         <field name="arch" type="xml">
             <tree string="Approval Types">
                 <field name="approvals_type"/>
+                <field name="visible_user_ids" widget="many2many_tags"/>
                 <field name="company_id"/>
             </tree>
         </field>
@@ -126,6 +127,7 @@
 
                     <group>
                         <field name="description"/>
+                        <field name="visible_user_ids" widget="many2many_tags" options="{'no_create': True}"/>
                         <field name="finance"/>
                         <field name="company_id" options="{'no_create': True}"
                                groups="base.group_multi_company"/>

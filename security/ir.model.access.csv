@@ -9,4 +9,14 @@ access_user_approval_request,user_approval_request,model_approval_request,other_
 access_user_approvals_type,user_approvals_type,model_approvals_types,other_users_approval_type,1,0,0,0
 access_user_approver,user_approver,model_approval_type_approver,other_users_approval_type,1,0,0,0
 
+access_hod_approval_request,hod_approval_request,model_approval_request,hod_approval_type,1,1,1,0
+access_hod_approvals_type,hod_approvals_type,model_approvals_types,hod_approval_type,1,0,0,0
+access_hod_approver,hod_approver,model_approval_type_approver,hod_approval_type,1,0,0,0
+access_hod_hold_date_wizard,hod_hold_date_wizard,model_hold_request_wizard,hod_approval_type,1,1,1,1
+
+access_sales_approval_request,sales_approval_request,model_approval_request,sales_department_user,1,1,1,0
+access_sales_approvals_type,sales_approvals_type,model_approvals_types,sales_department_user,1,0,0,0
+access_sales_approver,sales_approver,model_approval_type_approver,sales_department_user,1,0,0,0
+access_sales_hold_date_wizard,sales_hold_date_wizard,model_hold_request_wizard,sales_department_user,1,1,1,1
+
 access_ask_query_wizard,ask_query_wizard,model_ask_query_wizard,,1,1,1,1

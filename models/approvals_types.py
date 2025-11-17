@@ -13,6 +13,7 @@ class ApprovalsTypes(models.Model):
     approval_image = fields.Binary(string='Approval Image')
     description = fields.Text(string='Description')
     company_id = fields.Many2one('res.company', string='Company', default=lambda self: self.env.company)
+    visible_user_ids = fields.Many2many('res.users', 'approvals_types_visible_users_rel', 'approvals_types_id', 'user_id', string='Visible To Users', help='Users who can view this approval type')
     approver_ids = fields.One2many('approval.type.approver', 'approval_type_id', string='Approvers')
 
     approved_request_count = fields.Integer(string='Approved Requests', compute='_compute_request_counts')
@@ -21,6 +22,51 @@ class ApprovalsTypes(models.Model):
     to_verify_request_count = fields.Integer(string='To Verify', compute='_compute_request_counts')
 
     finance = fields.Boolean(string="Finance", default=False)
+
+    @api.model_create_multi
+    def create(self, vals_list):
+        """Create approval types and notify approvers"""
+        records = super().create(vals_list)
+        
+        for record in records:
+            # Get all approvers for this approval type
+            approvers = record.approver_ids.mapped('approver_id')
+            
+            if approvers:
+                # Create log message in chatter
+                message = f"<p>New approval type <strong>{record.approvals_type}</strong> has been created.</p>"
+                message += f"<p><strong>Description:</strong> {record.description or 'N/A'}</p>"
+                message += f"<p><strong>Approvers assigned:</strong> {', '.join([a.name for a in approvers])}</p>"
+                
+                record.message_post(body=message, message_type='comment')
+                
+                # Send email notification to each approver
+                for approver in approvers:
+                    try:
+                        # Create email content
+                        subject = f"New Approval Type Created: {record.approvals_type}"
+                        body = f"""
+                        <p>Hi {approver.name},</p>
+                        <p>A new approval type has been created and you have been assigned as an approver.</p>
+                        <p><strong>Approval Type:</strong> {record.approvals_type}</p>
+                        <p><strong>Description:</strong> {record.description or 'N/A'}</p>
+                        <p>Please log in to the system to view details and process approvals as needed.</p>
+                        <p>Best regards,<br/>The Approval System</p>
+                        """
+                        
+                        # Send email
+                        mail_values = {
+                            'subject': subject,
+                            'body_html': body,
+                            'email_to': approver.email,
+                            'email_from': self.env.user.email,
+                        }
+                        self.env['mail.mail'].create(mail_values).send()
+                    except Exception as e:
+                        # Log error but don't fail the creation
+                        print(f"Error sending email to {approver.name}: {str(e)}")
+        
+        return records
 
     @api.depends('approvals_type')
     def _compute_request_counts(self):

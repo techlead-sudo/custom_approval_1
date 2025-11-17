@@ -17,4 +17,13 @@
         <field name="name">Accountant users</field>
         <field name="category_id" ref="approval_type_groups"/>
     </record>
+    <record id="hod_approval_type" model="res.groups">
+        <field name="name">Head of Department</field>
+        <field name="category_id" ref="approval_type_groups"/>
+    </record>
+
+    <record id="sales_department_user" model="res.groups">
+        <field name="name">Sales Department User</field>
+        <field name="category_id" ref="approval_type_groups"/>
+    </record>
 </odoo>
