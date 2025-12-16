@@ -23,7 +23,7 @@ class AskQueryWizard(models.TransientModel):
         # Loop through each follower and schedule the activity on the main record
         for follower in self.follower_ids:
             record.activity_schedule(
-                activity_type_id=self.env.ref('custom_approval.mail_activity_data_todo').id,
+                activity_type_id=self.env.ref('custom_approval_1.mail_activity_data_todo').id,
                 user_id=follower.id,
                 summary=self.query_text,  # Use the query text as the summary
                 note=self.query_text  # You can use this for any additional note if needed

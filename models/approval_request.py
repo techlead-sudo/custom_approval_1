@@ -39,19 +39,22 @@ class ApprovalRequest(models.Model):
         for record in self:
             if record.state == 'draft':
                 record.sequence = 1
+            elif record.state == 'verification':
+                record.sequence = 1
             elif record.state == 'submitted':
+                record.sequence = 2
+            elif record.state == 'on_hold':
                 record.sequence = 2
             elif record.state == 'approved':
                 record.sequence = 3
             elif record.state == 'rejected':
                 record.sequence = 4
-            elif record.state == 'canceled':
-                record.sequence = 5
 
     def action_submit(self):
         """ when submitted  approvel request it will change the state into submitted"""
         approvers = self.approver_ids.mapped('approver_id')
-        group_id = 'custom_approval.accountant_user'
+        # Correct XML-ID for this module's accountant group
+        group_id = 'custom_approval_1.accountant_user'
         if self.finance:
             if self.finance_approval:
                 self.state = 'submitted'
@@ -61,7 +64,7 @@ class ApprovalRequest(models.Model):
                     print(approvers)
                     for approver in approvers_with_weightage:
                         self.activity_schedule(
-                            'custom_approval.mail_activity_data_todo',
+                            'custom_approval_1.mail_activity_data_todo',
                             user_id=approver.approver_id.id,
                         )
             else:
@@ -69,7 +72,7 @@ class ApprovalRequest(models.Model):
                     for approver in approvers:
                         if approver.has_group(group_id):
                             self.activity_schedule(
-                                'custom_approval.mail_activity_data_todo',
+                                'custom_approval_1.mail_activity_data_todo',
                                 user_id=approver.id,
                             )
                 self.state = 'verification'
@@ -78,7 +81,7 @@ class ApprovalRequest(models.Model):
             if approvers:
                 for approver in approvers:
                     self.activity_schedule(
-                        'custom_approval.mail_activity_data_todo',
+                        'custom_approval_1.mail_activity_data_todo',
                         user_id=approver.id,
                     )
 

@@ -7,7 +7,7 @@
        <field name="arch" type="xml">
            <form string="Ask Query">
                <group>
-                   <field name="follower_ids" widget="many2many_tags" domain="[('id', 'in', follower_ids)]"/> <!-- Display the followers -->
+                   <field name="follower_ids" widget="many2many_tags" domain="[('id', 'in', context.get('follower_ids', []))]"/> <!-- Display the followers -->
                    <field name="query_text" placeholder="Enter your query here..."/>
                </group>
                <footer>
