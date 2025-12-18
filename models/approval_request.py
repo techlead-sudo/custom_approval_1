@@ -61,7 +61,6 @@ class ApprovalRequest(models.Model):
                 if self.approver_ids:
                     # Filter approvers with weightage > 0
                     approvers_with_weightage = self.approver_ids.filtered(lambda approver: approver.weightage > 0)
-                    print(approvers)
                     for approver in approvers_with_weightage:
                         self.activity_schedule(
                             'custom_approval_1.mail_activity_data_todo',
@@ -222,8 +221,6 @@ class ApprovalRequest(models.Model):
 
     def action_ask_query(self):
         followers = self.message_follower_ids.mapped('partner_id.user_ids')
-        print("helloo")
-        print(followers)
         return {
             'type': 'ir.actions.act_window',
             'name': _('Ask Query'),
